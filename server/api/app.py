@@ -11,24 +11,25 @@ from flask_cors import CORS
 # -----------------------------
 # Configuration and Initialization
 # -----------------------------
-# All API keys and regions are loaded from environment variables.
-os.environ['PINECONE_API_KEY'] = os.getenv("PINECONE_API_KEY")  # Pull from environment
-os.environ['PINECONE_REGION'] = os.getenv("PINECONE_REGION")  # Pull from environment
-os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")  # Pull from environment
 
-pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+os.environ['PINECONE_API_KEY'] = os.environ.get("PINECONE_API_KEY")
+os.environ['PINECONE_REGION'] = os.environ.get("PINECONE_REGION")
+os.environ['OPENAI_API_KEY'] = os.environ.get("OPENAI_API_KEY")
+
+pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
 index_name = "embeddings-testing-6"
+
+# Connect to the Pinecone index (reuse the existing one)
 index = pc.Index(name=index_name)
 
+# Initialize Sentence Transformer for embeddings
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-
 
 # -----------------------------
 # OpenAI and RAG Pipeline Functions
 # -----------------------------
-openai.api_key = os.getenv('OPENAI_API_KEY')  # Pull from environment
+openai.api_key = os.environ.get('OPENAI_API_KEY')
 client = openai.OpenAI(api_key=openai.api_key)
-
 
 def retrieve_context(query, top_n=2):
     time.sleep(20)

@@ -13,7 +13,7 @@ from flask_cors import CORS
 # -----------------------------
 # All API keys and regions are loaded from environment variables.
 PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
-#PINECONE_REGION   = os.environ.get("PINECONE_REGION")
+PINECONE_REGION   = os.environ.get("PINECONE_REGION")
 OPENAI_API_KEY    = os.environ.get("OPENAI_API_KEY")
 
 pc = Pinecone(api_key=PINECONE_API_KEY)

@@ -11,73 +11,17 @@ from flask_cors import CORS
 # -----------------------------
 # Configuration and Initialization
 # -----------------------------
-
+# All API keys and regions are loaded from environment variables.
 PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
-PINECONE_REGION   = os.environ.get("PINECONE_REGION")
+#PINECONE_REGION   = os.environ.get("PINECONE_REGION")
 OPENAI_API_KEY    = os.environ.get("OPENAI_API_KEY")
 
 pc = Pinecone(api_key=PINECONE_API_KEY)
 index_name = "embeddings-testing-6"
-
-# Check if the index exists; if not, create it.
-existing_indexes = list(pc.list_indexes())
-try:
-    if index_name not in existing_indexes:
-        pc.create_index(
-            name=index_name,
-            dimension=384,  # Must match the embedding model's dimensionality.
-            metric="cosine",
-            spec=ServerlessSpec(cloud="aws", region=PINECONE_REGION)
-        )
-        print("Creating Pinecone index... Waiting for it to be ready.")
-        time.sleep(20)  # Adjust delay as needed.
-except pinecone.openapi_support.exceptions.PineconeApiException as e:
-    if "ALREADY_EXISTS" in str(e):
-        print("Index already exists. Using the existing index.")
-    else:
-        raise
-
-# Connect to the Pinecone index (reuse the existing one)
 index = pc.Index(name=index_name)
 
-# Initialize Sentence Transformer for embeddings
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# -----------------------------
-# Data Processing and Upsert Section
-# -----------------------------
-def chunk_text(text, max_length=200):
-    sentences = text.split('. ')
-    chunks = []
-    current_chunk = ''
-    for sentence in sentences:
-        if len(current_chunk) + len(sentence) <= max_length:
-            current_chunk += sentence + '. '
-        else:
-            chunks.append(current_chunk.strip())
-            current_chunk = sentence + '. '
-    if current_chunk:
-        chunks.append(current_chunk.strip())
-    return chunks
-
-file_path = '../data/CST Test Data.xlsx'
-df = pd.read_excel(file_path)
-
-vectors_to_upsert = []
-for row_index, row in df.iterrows():
-    content = f"Product Name: {row['Product Name']}\nProduct Type: {row['Product Type']}\nIssue Description: {row['Issue Description']}\nResolution Suggestion: {row['Resolution Suggestion']}"
-    chunks = chunk_text(content)
-    for chunk_index, chunk in enumerate(chunks):
-        embedding = embedding_model.encode(chunk).tolist()
-        vectors_to_upsert.append(
-            (f"{row_index}_{chunk_index}", embedding, {"text": chunk, "resource_id": row_index})
-        )
-
-batch_size = 100
-for i in range(0, len(vectors_to_upsert), batch_size):
-    index.upsert(vectors=vectors_to_upsert[i:i + batch_size])
-
-print("✅ Embeddings have been successfully stored in Pinecone.")
 
 # -----------------------------
 # OpenAI and RAG Pipeline Functions

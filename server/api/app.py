@@ -32,7 +32,7 @@ openai.api_key = os.environ.get('OPENAI_API_KEY')
 client = openai.OpenAI(api_key=openai.api_key)
 
 def retrieve_context(query, top_n=2):
-    time.sleep(20)
+    #time.sleep(20)
     query_embedding = embedding_model.encode(query).tolist()
     query_result = index.query(
         vector=query_embedding,

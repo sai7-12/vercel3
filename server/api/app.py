@@ -17,7 +17,7 @@ os.environ['PINECONE_REGION'] = os.getenv("PINECONE_REGION")  # Pull from enviro
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")  # Pull from environment
 
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-index_name = "embeddings_testing_6"
+index_name = "embeddings-testing-6"
 index = pc.Index(name=index_name)
 
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
